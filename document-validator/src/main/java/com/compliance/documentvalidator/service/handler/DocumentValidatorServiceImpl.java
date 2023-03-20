@@ -9,6 +9,7 @@ import com.compliance.documentvalidator.exception.DocumentValidatorException;
 import com.compliance.documentvalidator.repository.UserCredentialsRepository;
 import com.compliance.documentvalidator.service.DocumentValidatorService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 
+@Slf4j
 @Service
 public class DocumentValidatorServiceImpl implements DocumentValidatorService {
 
@@ -48,17 +50,21 @@ public class DocumentValidatorServiceImpl implements DocumentValidatorService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(new ArrayList<>(Arrays.asList(MediaType.APPLICATION_JSON)));
 
+        log.info("Base64 encoding the invoice contents");
         Base64.Encoder encoder = Base64.getEncoder();
         String encodedContent = encoder.encodeToString(docGeneratorPayload.getDocumnet().getContent().getBytes());
         docGeneratorPayload.getDocumnet().setContent(encodedContent);
+        log.info("Content Base64 encoded and value set to the Doc Generator Payload");
 
         HttpEntity<DocGeneratorPayload> input = new HttpEntity<>(docGeneratorPayload, headers);
         ResponseEntity<DocumentValidatorResponse> docGeneratorResponse;
 
         try {
+            log.info("Calling the Doc Generator API to validate the invoice");
             docGeneratorResponse = restTemplate.exchange(new URI(docGeneratorApi), HttpMethod.POST, input, DocumentValidatorResponse.class);
         }
         catch (HttpClientErrorException | HttpServerErrorException ex) {
+            log.error("Exception occurred while validating the invoice with exception message -> "+ex.getMessage());
             throw new DocumentValidatorException(ex.getStatusCode(), ex.getMessage());
         }
         return ResponseEntity.ok(docGeneratorResponse.getBody());
@@ -68,13 +74,16 @@ public class DocumentValidatorServiceImpl implements DocumentValidatorService {
 
         UserCredentials userCredentials = new UserCredentials();
         try {
+            log.info("Registering the user");
             userCredentials.setClientId(users.getClientId());
             userCredentials.setClientSecret(passwordEncoder.encode(users.getClientSecret()));
             userCredentials.setCompanyId(users.getCompanyId());
             userCredentials.setRoles(users.getRoles());
             userCredentialsRepository.save(userCredentials);
+            log.info("User Registered with role "+users.getRoles());
         }
         catch (HttpClientErrorException | HttpServerErrorException ex) {
+            log.error("Error occurred while registering the user with exception -> "+ex.getMessage());
             throw new DocumentValidatorException(ex.getStatusCode(), ex.getMessage());
         }
         return ResponseEntity.ok("User added successfully...!!!");

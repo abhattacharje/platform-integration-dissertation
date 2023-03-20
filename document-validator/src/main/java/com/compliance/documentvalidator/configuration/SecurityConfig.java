@@ -1,6 +1,7 @@
 package com.compliance.documentvalidator.configuration;
 
 import com.compliance.documentvalidator.filter.JwtAuthFilter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+@Slf4j
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -33,6 +35,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        log.info("Inside security filter chain");
         return http.csrf().disable()
                 .authorizeHttpRequests()
                 .requestMatchers("/docValidator/userRegister","/docValidator/getToken").permitAll()
@@ -49,11 +52,13 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
+        log.info("Inside password encoder");
         return new BCryptPasswordEncoder();
     }
 
     @Bean
     public AuthenticationProvider authenticationProvider(){
+        log.info("Inside authentication provider");
         DaoAuthenticationProvider authenticationProvider=new DaoAuthenticationProvider();
         authenticationProvider.setUserDetailsService(userDetailsService());
         authenticationProvider.setPasswordEncoder(passwordEncoder());
@@ -62,6 +67,7 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        log.info("Inside authentication manager");
         return config.getAuthenticationManager();
     }
 }

@@ -36,6 +36,7 @@ public class CompanyRegistrationServiceImpl implements CompanyRegistrationServic
 
         CompanyDetails companyDetails = new CompanyDetails();
         String companyId = UUID.randomUUID().toString();
+        log.info("companyId generated");
 
         companyDetails.setCompanyName(companyPayload.getCompanyName());
         companyDetails.setUserName(companyPayload.getUserName());
@@ -44,8 +45,10 @@ public class CompanyRegistrationServiceImpl implements CompanyRegistrationServic
 
         try {
             companyDetailsRepository.save(companyDetails);
+            log.info("Company registered in DB");
         }
         catch (HttpClientErrorException | HttpServerErrorException ex) {
+            log.error("Exception occurred while registering company");
             throw new DocumentGeneratorException(ex.getStatusCode(), ex.getMessage());
         }
         return ResponseEntity.ok(companyPayload);
@@ -59,12 +62,15 @@ public class CompanyRegistrationServiceImpl implements CompanyRegistrationServic
             Optional<CompanyDetails> companyInfo = companyDetailsRepository.findByCompanyId(companyId);
             if(companyInfo.isPresent()) {
                 company = companyInfo.get();
+                log.info("Company is present, fetching company details");
             }
             else {
+                log.error("Company not present with companyId -> "+companyId);
                 throw new HttpClientErrorException(HttpStatusCode.valueOf(404), "Company Not Found");
             }
         }
         catch (HttpClientErrorException | HttpServerErrorException ex) {
+            log.error("Exception occurred while fetching company details");
             throw new DocumentGeneratorException(ex.getStatusCode(), ex.getMessage());
         }
         return ResponseEntity.ok(company);
@@ -78,33 +84,42 @@ public class CompanyRegistrationServiceImpl implements CompanyRegistrationServic
 
         try {
             Optional<CompanyDetails> companyInfo = companyDetailsRepository.findByCompanyId(invoicePayload.getSender());
+            log.info("Fetching the sender details");
+
             if(companyInfo.isPresent()) {
 
                 company = companyInfo.get();
+                log.info("Sender details fetched");
 
                 String documentId = invoicePayload.getDocumnet().getId();
                 String documentContent = invoicePayload.getDocumnet().getContent();
+                log.info("Fetching invoice details");
 
                 Base64.Decoder decoder = Base64.getDecoder();
                 documentContent = new String(decoder.decode(documentContent));
+                log.info("Base64 decoding the invoice content");
 
                 if(documentId.equals(documentContent)) {
                     invoiceResponse.setCompanyName(company.getCompanyName());
                     invoiceResponse.setValidationMessage("Invoice is Valid");
+                    log.info("Invoice is valid");
                 }
                 else {
                     invoiceResponse.setCompanyName(company.getCompanyName());
                     invoiceResponse.setValidationMessage("Invoice is InValid");
+                    log.error("Invoice is invalid [Exception occurred] invoice id -> "+documentId);
                     throw new InvoiceException(HttpStatusCode.valueOf(400), invoiceResponse);
                 }
             }
             else {
                 invoiceResponse.setCompanyName("<NOT PRESENT>");
                 invoiceResponse.setValidationMessage("Company Not Present.");
+                log.error("Company not present [Exception occurred] company name -> "+companyInfo.get().getCompanyName());
                 throw new InvoiceException(HttpStatusCode.valueOf(404), invoiceResponse);
             }
         }
         catch (InvoiceException ex) {
+            log.error("Exception occurred while validating the invoice");
             throw new DocumentGeneratorException(ex.getStatusCode(), ex.getInvoiceResponse().getValidationMessage());
         }
         return ResponseEntity.ok(invoiceResponse);

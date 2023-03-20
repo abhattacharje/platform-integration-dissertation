@@ -34,8 +34,10 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 
         try {
             usersRepository.save(users);
+            log.info("User registered successfully with role "+userPayload.getRoles());
         }
         catch (HttpClientErrorException | HttpServerErrorException ex) {
+            log.error("Exception occurred while registering user -> "+ex.getMessage());
             throw new DocumentGeneratorException(ex.getStatusCode(), ex.getMessage());
         }
         return ResponseEntity.ok(userPayload);

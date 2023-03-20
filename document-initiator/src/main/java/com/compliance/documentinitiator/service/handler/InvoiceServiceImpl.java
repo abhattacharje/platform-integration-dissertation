@@ -8,6 +8,7 @@ import com.compliance.documentinitiator.entity.Invoices;
 import com.compliance.documentinitiator.exception.DocumentInitiatorException;
 import com.compliance.documentinitiator.repository.InvoicesRepository;
 import com.compliance.documentinitiator.service.InvoicesService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class InvoiceServiceImpl implements InvoicesService {
 
@@ -50,7 +52,9 @@ public class InvoiceServiceImpl implements InvoicesService {
         Invoices invoice = new Invoices();
 
         try {
+            log.info("Generating the Bearer token from Document Validator API");
             bearerToken = restTemplate.exchange(new URI(tokenGeneratorApi), HttpMethod.POST, tokenGenerationInput, String.class);
+            log.info("Bearer token generated");
 
             HttpHeaders validationApiHeader = new HttpHeaders();
             validationApiHeader.setContentType(MediaType.APPLICATION_JSON);
@@ -58,7 +62,9 @@ public class InvoiceServiceImpl implements InvoicesService {
             validationApiHeader.set("Authorization", "Bearer "+bearerToken.getBody());
             HttpEntity<InitiatorPayload> validationInput = new HttpEntity<>(initiatorPayload, validationApiHeader);
 
+            log.info("Calling Document Validator API to validate the invoice");
             validationResponse = restTemplate.exchange(new URI(invoiceValidationApi), HttpMethod.POST, validationInput, DocumentInitiatorResponse.class);
+            log.info("Invoice validated by Document Generator through Document Validator");
 
             String invoiceId = UUID.randomUUID().toString();
             invoice.setInvoiceId(invoiceId);
@@ -69,6 +75,7 @@ public class InvoiceServiceImpl implements InvoicesService {
             invoice.setInvoiceStatus(validationResponse.getBody().getValidationMessage());
 
             invoicesRepository.save(invoice);
+            log.info("Saving the invoice validated in the DB");
         }
         catch (HttpClientErrorException | HttpServerErrorException ex) {
 
@@ -82,6 +89,7 @@ public class InvoiceServiceImpl implements InvoicesService {
                 invoice.setInvoiceStatus("Invoice is InValid");
 
                 invoicesRepository.save(invoice);
+                log.info("Invoice saved but with status -> "+invoice.getInvoiceStatus());
             }
             else if(ex.getMessage().contains("Company Not Present.")) {
                 String invoiceId = UUID.randomUUID().toString();
@@ -93,6 +101,7 @@ public class InvoiceServiceImpl implements InvoicesService {
                 invoice.setInvoiceStatus("Company Not Present.");
 
                 invoicesRepository.save(invoice);
+                log.info("Invoice saved but with status -> "+invoice.getInvoiceStatus());
             }
 
             throw new DocumentInitiatorException(ex.getStatusCode(), ex.getMessage());
@@ -104,9 +113,11 @@ public class InvoiceServiceImpl implements InvoicesService {
     public ResponseEntity<List<Invoices>> getAllInvoices() {
         List<Invoices> listOfInvoices;
         try {
+            log.info("Fetching all the invoices");
             listOfInvoices = invoicesRepository.findAll();
         }
         catch (HttpClientErrorException | HttpServerErrorException ex) {
+            log.error("Error while fetching the invoices");
             throw new DocumentInitiatorException(ex.getStatusCode(), ex.getMessage());
         }
         return ResponseEntity.ok(listOfInvoices);

@@ -34,8 +34,10 @@ public class DocumentGeneratorController {
             ResponseEntity<User> user = userService.registerUser(usersPayload);
         }
         catch (HttpClientErrorException | HttpServerErrorException ex) {
+            log.error("Cannot register the user. Exception occurred");
             throw new DocumentGeneratorException(ex.getStatusCode(), ex.getMessage());
         }
+        log.info("User Registered successfully -> "+usersPayload.getUserName());
         return ResponseEntity.ok("User Added Successfully...!!!");
     }
 
@@ -47,8 +49,10 @@ public class DocumentGeneratorController {
             ResponseEntity<Company> company = companyService.registerCompany(companyPayload);
         }
         catch (HttpClientErrorException | HttpServerErrorException ex) {
+            log.error("Cannot register the company. Exception occurred");
             throw new DocumentGeneratorException(ex.getStatusCode(), ex.getMessage());
         }
+        log.info("Company Registered successfully -> "+companyPayload.getCompanyName());
         return ResponseEntity.ok("Company Added Successfully...!!!");
     }
 
@@ -61,8 +65,10 @@ public class DocumentGeneratorController {
             companyDetails = companyService.getCompanyByCompanyId(companyId);
         }
         catch (HttpClientErrorException | HttpServerErrorException ex) {
+            log.error("Error in fetching company details with company id: "+companyId);
             throw new DocumentGeneratorException(ex.getStatusCode(), ex.getMessage());
         }
+        log.info("Company Details fetched successfully -> "+companyId);
         return ResponseEntity.ok(companyDetails.getBody());
     }
 
@@ -70,7 +76,9 @@ public class DocumentGeneratorController {
     public ResponseEntity<InvoiceResponse> acceptAndValidateInvoice(@RequestBody InvoicePayload invoicePayload) {
 
         ResponseEntity<InvoiceResponse> invoiceResponse;
+        log.info("[Inside DocumentGeneratorController] validate invoice");
         invoiceResponse = companyService.acceptAndValidateInvoice(invoicePayload);
+        log.info("[Inside DocumentGeneratorController] invoice validated");
         return ResponseEntity.ok(invoiceResponse.getBody());
     }
 }
