@@ -60,6 +60,9 @@ public class CompanyRegistrationServiceImpl implements CompanyRegistrationServic
             if(companyInfo.isPresent()) {
                 company = companyInfo.get();
             }
+            else {
+                throw new HttpClientErrorException(HttpStatusCode.valueOf(404), "Company Not Found");
+            }
         }
         catch (HttpClientErrorException | HttpServerErrorException ex) {
             throw new DocumentGeneratorException(ex.getStatusCode(), ex.getMessage());
