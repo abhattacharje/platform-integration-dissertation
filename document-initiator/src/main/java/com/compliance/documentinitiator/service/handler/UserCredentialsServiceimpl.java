@@ -1,9 +1,11 @@
 package com.compliance.documentinitiator.service.handler;
 
 import com.compliance.documentinitiator.configuration.PropertyConfiguration;
+import com.compliance.documentinitiator.dto.LoginUser;
 import com.compliance.documentinitiator.dto.Users;
 import com.compliance.documentinitiator.entity.UserCredentials;
 import com.compliance.documentinitiator.exception.DocumentInitiatorException;
+import com.compliance.documentinitiator.exception.UserLoginException;
 import com.compliance.documentinitiator.repository.UserCredentialsRepository;
 import com.compliance.documentinitiator.service.UserCredentialsService;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +21,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Objects;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -63,5 +67,29 @@ public class UserCredentialsServiceimpl implements UserCredentialsService {
             throw new DocumentInitiatorException(ex.getStatusCode(), ex.getMessage());
         }
         return ResponseEntity.ok(userRegistrationResponse.getBody());
+    }
+
+    public ResponseEntity<UserCredentials> validateUser(LoginUser loginUser) {
+
+        UserCredentials principal = new UserCredentials();
+        try {
+            Optional<UserCredentials> userPrincipal = userCredentialsRepository.findById(loginUser.getClientId());
+            if(userPrincipal.isPresent()) {
+                principal = userPrincipal.get();
+
+                if(!passwordEncoder.matches(loginUser.getClientSecret(), principal.getClientSecret())) {
+                    throw new UserLoginException(HttpStatusCode.valueOf(404), "Incorrect Credentials");
+                }
+                log.info("Login details fetched after validation");
+            }
+            else {
+                log.error("User not found. Exception occurred");
+                throw new UserLoginException(HttpStatusCode.valueOf(404), "User Not Found");
+            }
+        }
+        catch (UserLoginException ex) {
+            throw new DocumentInitiatorException(ex.getStatusCode(), ex.getMessage());
+        }
+        return ResponseEntity.ok(principal);
     }
 }

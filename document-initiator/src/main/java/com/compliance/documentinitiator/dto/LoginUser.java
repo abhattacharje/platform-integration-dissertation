@@ -1,4 +1,4 @@
-package com.compliance.documentvalidator.dto;
+package com.compliance.documentinitiator.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Credentials {
+public class LoginUser {
 
     @JsonProperty("clientId")
     private String clientId;

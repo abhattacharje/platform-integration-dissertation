@@ -3,6 +3,7 @@ package com.compliance.documentinitiator.service.handler;
 import com.compliance.documentinitiator.configuration.PropertyConfiguration;
 import com.compliance.documentinitiator.dto.DocumentInitiatorResponse;
 import com.compliance.documentinitiator.dto.InitiatorPayload;
+import com.compliance.documentinitiator.dto.TokenGenerationPayload;
 import com.compliance.documentinitiator.dto.Users;
 import com.compliance.documentinitiator.entity.Invoices;
 import com.compliance.documentinitiator.exception.DocumentInitiatorException;
@@ -45,7 +46,7 @@ public class InvoiceServiceImpl implements InvoicesService {
         HttpHeaders tokenGeneratorHeaders = new HttpHeaders();
         tokenGeneratorHeaders.setContentType(MediaType.APPLICATION_JSON);
         tokenGeneratorHeaders.setAccept(new ArrayList<>(Arrays.asList(MediaType.APPLICATION_JSON)));
-        HttpEntity<Users> tokenGenerationInput = new HttpEntity<>(initiatorPayload.getUsers(), tokenGeneratorHeaders);
+        HttpEntity<TokenGenerationPayload> tokenGenerationInput = new HttpEntity<>(initiatorPayload.getTokenGenerationPayload(), tokenGeneratorHeaders);
         ResponseEntity<String> bearerToken;
         ResponseEntity<DocumentInitiatorResponse> validationResponse;
 

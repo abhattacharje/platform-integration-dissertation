@@ -1,6 +1,7 @@
 package com.compliance.documentinitiator.exception.handler;
 
 import com.compliance.documentinitiator.exception.DocumentInitiatorException;
+import com.compliance.documentinitiator.exception.UserLoginException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;

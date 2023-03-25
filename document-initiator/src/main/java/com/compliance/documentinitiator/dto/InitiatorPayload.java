@@ -24,6 +24,6 @@ public class InitiatorPayload {
     @JsonProperty("document")
     private Documents document;
 
-    @JsonProperty("users")
-    private Users users;
+    @JsonProperty("tokenGenerationPayload")
+    private TokenGenerationPayload tokenGenerationPayload;
 }
