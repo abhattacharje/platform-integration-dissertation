@@ -114,7 +114,7 @@ public class CompanyRegistrationServiceImpl implements CompanyRegistrationServic
             else {
                 invoiceResponse.setCompanyName("<NOT PRESENT>");
                 invoiceResponse.setValidationMessage("Company Not Present.");
-                log.error("Company not present [Exception occurred] company name -> "+companyInfo.get().getCompanyName());
+                log.error("Company not present [Exception occurred]");
                 throw new InvoiceException(HttpStatusCode.valueOf(404), invoiceResponse);
             }
         }
