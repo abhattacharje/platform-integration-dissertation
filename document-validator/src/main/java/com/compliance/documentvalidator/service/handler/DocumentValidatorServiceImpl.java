@@ -8,7 +8,6 @@ import com.compliance.documentvalidator.entity.UserCredentials;
 import com.compliance.documentvalidator.exception.DocumentValidatorException;
 import com.compliance.documentvalidator.repository.UserCredentialsRepository;
 import com.compliance.documentvalidator.service.DocumentValidatorService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
@@ -33,9 +32,6 @@ public class DocumentValidatorServiceImpl implements DocumentValidatorService {
 
     @Autowired
     private RestTemplate restTemplate;
-
-    @Autowired
-    private ObjectMapper mapper;
 
     @Autowired
     private UserCredentialsRepository userCredentialsRepository;
