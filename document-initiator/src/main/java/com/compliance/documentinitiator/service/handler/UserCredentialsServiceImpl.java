@@ -21,12 +21,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
 @Service
-public class UserCredentialsServiceimpl implements UserCredentialsService {
+public class UserCredentialsServiceImpl implements UserCredentialsService {
 
     @Autowired
     private RestTemplate restTemplate;
